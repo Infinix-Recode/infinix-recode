@@ -1,0 +1,287 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinix-Recode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #0A0A0A;
+            --secondary-bg: #1C1C1C;
+            --text-color: #E8E8E8;
+            --secondary-text: #A0A0A0;
+            --highlight: #FFFFFF;
+            --hover: #252525;
+            --shadow: #151515;
+            --border: #333333;
+            --accent: #4A4A4A;
+            --glass-bg: rgba(255, 255, 255, 0.2);
+            --ripple: rgba(255, 255, 255, 0.2);
+            --divider: #2A2A2A;
+            --font-size-header: 24px;
+            --font-size-subheader: 18px;
+            --font-size-body: 14px;
+            --animation-duration: 400ms;
+            --transition-duration: 600ms;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--primary-bg);
+            color: var(--text-color);
+            font-size: var(--font-size-body);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(45deg, var(--primary-bg), var(--secondary-bg), var(--accent));
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header .logo img {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            filter: grayscale(100%) brightness(200%);
+        }
+
+        header .title {
+            font-size: var(--font-size-header);
+            font-weight: 700;
+            color: var(--highlight);
+        }
+
+        header nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color var(--animation-duration) ease-in-out;
+        }
+
+        header nav a:hover {
+            color: var(--highlight);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(45deg, var(--primary-bg), var(--secondary-bg));
+        }
+
+        .hero h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--highlight);
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: var(--font-size-subheader);
+            color: var(--secondary-text);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .features {
+            padding: 60px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 12px var(--shadow);
+            transition: transform var(--animation-duration) ease-in-out, box-shadow var(--animation-duration) ease-in-out;
+        }
+
+        .feature-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px var(--shadow);
+            background: var(--hover);
+        }
+
+        .feature-card h3 {
+            font-size: var(--font-size-subheader);
+            font-weight: 600;
+            color: var(--highlight);
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: var(--secondary-text);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: var(--secondary-bg);
+            border-top: 1px solid var(--divider);
+            color: var(--secondary-text);
+            font-size: 12px;
+        }
+
+        footer a {
+            color: var(--highlight);
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            header nav {
+                margin-top: 10px;
+            }
+
+            header nav a {
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .features {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+    <script>
+        // Анимация набора текста
+        function typeText(element, text, speed = 100) {
+            let index = 0;
+            element.textContent = '';
+            const interval = setInterval(() => {
+                if (index < text.length) {
+                    element.textContent += text.charAt(index);
+                    index++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, speed);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const title = document.querySelector('.title');
+            typeText(title, 'Infinix-Recode', 100);
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="logo.png" alt="Infinix-Recode Logo">
+        </div>
+        <div class="title">Infinix-Recode</div>
+        <nav>
+            <a href="https://discord.gg/infinix" target="_blank">Discord</a>
+            <a href="https://t.me/infinix_recode" target="_blank">Telegram</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Добро пожаловать в Infinix-Recode</h1>
+        <p>Мощный инструмент для OSINT, тестирования на проникновение и анализа безопасности. Исследуйте, анализируйте и защищайте с помощью передовых технологий.</p>
+    </section>
+
+    <section class="features">
+        <div class="feature-card">
+            <h3>Поиск</h3>
+            <p>Поиск по имени, номеру телефона, email, Telegram, VK, Instagram и другим платформам.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Pentest</h3>
+            <p>Сканирование IP-адресов и доменов для выявления уязвимостей и анализа сетей.</p>
+        </div>
+        <div class="feature-card">
+            <h3>OSINT</h3>
+            <p>Поиск по никнеймам, Google Dorks и парсинг Steam-аккаунтов для сбора данных.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Анонимность</h3>
+            <p>Проверка уровня анонимности, включая VPN, Tor и WebRTC.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Infinix-Recode v1.8-BETA | Последнее обновление: 18.05.2025</p>
+        <p>© 2025 Infinix-Recode. Все права защищены.</p>
+        <p>
+            <a href="https://discord.gg/infinix" target="_blank">Discord</a> |
+            <a href="https://t.me/infinix_recode" target="_blank">Telegram</a>
+        </p>
+    </footer>
+</body>
+</html>
